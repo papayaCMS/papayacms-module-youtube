@@ -1,10 +1,5 @@
 <?php
-include_once(dirname(__FILE__).'/../../../../../bootstrap.php');
-PapayaTestCase::registerPapayaAutoloader(
-  array(
-    'PapayaModuleYoutube' => 'modules/free/Youtube'
-  )
-);
+require_once(dirname(__FILE__).'/../bootstrap.php');
 
 class PapayaModuleYoutubeVideoBoxTest extends PapayaTestCase {
 
