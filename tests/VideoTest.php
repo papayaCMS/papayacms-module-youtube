@@ -53,15 +53,17 @@ class PapayaModuleYoutubeVideoTest extends PapayaTestCase {
   }
 
   /**
-  * @covers PapayaModuleYoutubeVideo::getPageXml
-  * @dataProvider getPageXmlProvider
-  *
-  * @param int $serNoCookie
-  * @param string $videoFormat
-  * @param string $url
-  * @param int $height
-  */
-  public function testGetPageXml($setNoCookie, $videoFormat, $url, $height) {
+   * @covers       PapayaModuleYoutubeVideo::getPageXml
+   * @dataProvider getPageXmlProvider
+   *
+   * @param int $setNoCookie
+   * @param string $videoFormat
+   * @param string $url
+   * @param int $height
+   * @param int $html5
+   */
+  public function testGetPageXml($setNoCookie, $videoFormat, $url, $height, $html5) {
+    $pluginLoaderMock = $this->getPluginLoaderMock(array(array('FORCE_HTML5', 1, NULL, $html5)));
     $videoObject = new PapayaModuleYoutubeVideo_TestProxy();
     $data = array(
       "title" => "new video",
@@ -85,12 +87,15 @@ class PapayaModuleYoutubeVideoTest extends PapayaTestCase {
     $videoObject->setPageData($data);
     $owner = $this->getMock('base_object', array('getPapayaImageTag'));
     $videoObject->setOwner($owner);
+    $papaya = $this->mockPapaya()->application(array('plugins' => $pluginLoaderMock));
+    $videoObject->papaya($papaya);
     $this->assertXmlStringEqualsXmlString(
       '<video>
         <title>new video</title>
         <subtitle/>
         <player videoId="wPOgvzVOQig" width="560" height="'.$height.'"
-          autoplay="0" rel="0" info="1" controls="1" url="'.$url.'"/>
+          autoplay="0" rel="0" info="1" controls="1" url="'.$url.'"
+          html5="'.($html5 ? 'yes' : 'no').'"/>
         <teaser>this is the teaser text</teaser>
         <image align="left" break="none"/>
         <text>A video from Youtube</text>
@@ -102,10 +107,14 @@ class PapayaModuleYoutubeVideoTest extends PapayaTestCase {
   //---------------dataProvider---------------
   public static function getPageXmlProvider() {
     return array(
-      "no_cookie_16_9" => array("1", "16:9", "http://www.youtube-nocookie.com", 316),
-      "no_cookie_4_3" => array("1", "4:3", "http://www.youtube-nocookie.com", 421),
-      "cookie_16_9" => array("0", "16:9", "http://www.youtube.com", 316),
-      "cookie_4_3" => array("0", "4:3", "http://www.youtube.com", 421)
+      "no_cookie_16_9_html5" => array("1", "16:9", "http://www.youtube-nocookie.com", 316, 1),
+      "no_cookie_16_9_flash" => array("1", "16:9", "http://www.youtube-nocookie.com", 316, 0),
+      "no_cookie_4_3_html5" => array("1", "4:3", "http://www.youtube-nocookie.com", 421, 1),
+      "no_cookie_4_3_flash" => array("1", "4:3", "http://www.youtube-nocookie.com", 421, 0),
+      "cookie_16_9_html5" => array("0", "16:9", "http://www.youtube.com", 316, 1),
+      "cookie_16_9_flash" => array("0", "16:9", "http://www.youtube.com", 316, 0),
+      "cookie_4_3_html5" => array("0", "4:3", "http://www.youtube.com", 421, 1),
+      "cookie_4_3_flash" => array("0", "4:3", "http://www.youtube.com", 421, 0),
     );
   }
 
@@ -133,15 +142,17 @@ class PapayaModuleYoutubeVideoTest extends PapayaTestCase {
   }
 
   /**
-  * @covers PapayaModuleYoutubeVideo::getBoxXml
-  * @dataProvider getBoxXmlProvider
-  *
-  * @param type $setNoCookie
-  * @param type $videoFormat
-  * @param type $url
-  * @param type $height
-  */
-  public function testGetBoxXml($setNoCookie, $videoFormat, $url, $height) {
+   * @covers       PapayaModuleYoutubeVideo::getBoxXml
+   * @dataProvider getBoxXmlProvider
+   *
+   * @param string $setNoCookie
+   * @param string $videoFormat
+   * @param string $url
+   * @param int $height
+   * @param int $html5
+   */
+  public function testGetBoxXml($setNoCookie, $videoFormat, $url, $height, $html5) {
+    $pluginLoaderMock = $this->getPluginLoaderMock(array(array('FORCE_HTML5', 1, NULL, $html5)));
     $videoObject = new PapayaModuleYoutubeVideo_TestProxy();
     $data = array(
       "title" => "new video",
@@ -160,11 +171,14 @@ class PapayaModuleYoutubeVideoTest extends PapayaTestCase {
     $videoObject->setBoxData($data);
     $owner = $this->getMock('base_object', array('getPapayaImageTag'));
     $videoObject->setOwner($owner);
+    $papaya = $this->mockPapaya()->application(array('plugins' => $pluginLoaderMock));
+    $videoObject->papaya($papaya);
     $this->assertXmlStringEqualsXmlString(
       '<youtubebox>
         <title>new video</title>
         <player videoId="wPOgvzVOQig" width="560" height="'.$height.'"
-         autoplay="0" rel="0" info="1" controls="1" url="'.$url.'"/>
+         autoplay="0" rel="0" info="1" controls="1" url="'.$url.'"
+         html5="'.($html5 ? 'yes' : 'no').'"/>
         <text>A video from Youtube</text>
       </youtubebox>',
       $videoObject->getBoxXml()
@@ -174,11 +188,50 @@ class PapayaModuleYoutubeVideoTest extends PapayaTestCase {
   //---------------dataProvider---------------
   public static function getBoxXmlProvider() {
     return array(
-      "cookie_16_9" => array("0", "16:9", "http://www.youtube.com", 316),
-      "cookie_4_3" => array("0", "4:3", "http://www.youtube.com", 421),
-      "no_cookie_16_9" => array("1", "16:9", "http://www.youtube-nocookie.com", 316),
-      "no_cookie_4_3" => array("1", "4:3", "http://www.youtube-nocookie.com", 421),
+      "cookie_16_9_html5" => array("0", "16:9", "http://www.youtube.com", 316, 1),
+      "cookie_16_9_flash" => array("0", "16:9", "http://www.youtube.com", 316, 0),
+      "cookie_4_3_html5" => array("0", "4:3", "http://www.youtube.com", 421, 1),
+      "cookie_4_3_flash" => array("0", "4:3", "http://www.youtube.com", 421, 0),
+      "no_cookie_16_9_html5" => array("1", "16:9", "http://www.youtube-nocookie.com", 316, 1),
+      "no_cookie_16_9_flash" => array("1", "16:9", "http://www.youtube-nocookie.com", 316, 0),
+      "no_cookie_4_3_html5" => array("1", "4:3", "http://www.youtube-nocookie.com", 421, 1),
+      "no_cookie_4_3_flash" => array("1", "4:3", "http://www.youtube-nocookie.com", 421, 0),
     );
+  }
+
+  /**
+   * @covers PapayaModuleYoutubeVideo::getModuleOption
+   */
+  public function testGetModuleOption() {
+    $pluginLoaderMock = $this->getPluginLoaderMock(array(array('test_option', 42, NULL, 4223)));
+
+    $mockPapaya = $this->mockPapaya()->application(array('plugins' => $pluginLoaderMock));
+
+    $config = new PapayaModuleYoutubeVideo_TestProxy();
+    $config->papaya($mockPapaya);
+    $this->assertEquals(4223, $config->getModuleOption('test_option', 42, NULL));
+  }
+
+  /**
+   * @param array $valueMap
+   * @return PapayaPluginLoader
+   */
+  private function getPluginLoaderMock($valueMap = array()) {
+    $options = $this
+      ->getMockBuilder('PapayaPluginOptions')
+      ->disableOriginalConstructor()
+      ->getMock();
+    $options
+      ->expects($this->any())
+      ->method('get')
+      ->will($this->returnValueMap($valueMap));
+    $plugins = $this->getMockBuilder('PapayaPluginLoader')->getMock();
+    $plugins
+      ->expects($this->any())
+      ->method('__get')
+      ->with('options')
+      ->will($this->returnValue(array(PapayaModuleYoutubeVideo::GUID => $options)));
+    return $plugins;
   }
 
 }
