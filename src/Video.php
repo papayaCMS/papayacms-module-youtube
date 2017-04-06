@@ -170,17 +170,6 @@ class PapayaModuleYoutubeVideo extends base_connector {
     );
     $text = $content->appendElement("text");
     $text->appendXml($this->_data['text']);
-
-    if (isset($this->_data['modified'])) {
-      $content->appendElement(
-        "history",
-        array(
-          "modified" => $this->_data['modified'],
-          "created" => $this->_data['created'],
-          "update" => $this->_data['update']
-        )
-      );
-    }
     return $papyaXmlDomObject->saveXML($content);
   }
 
