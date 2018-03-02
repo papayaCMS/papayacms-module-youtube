@@ -238,7 +238,7 @@ class PapayaModuleYoutubeVideoPage extends base_content {
   *
   * @return string XML
   */
-  public function getParsedData() {
+  public function getParsedData($parseParams = NULL) {
     $pageBaseObject = $this->getVideoObject();
     $this->setDefaultData();
     $this->initializeParams();
